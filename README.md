@@ -1,6 +1,6 @@
 # ransomDetector
 
-## Thanks
+### Thanks
 
 https://github.com/log2timeline/plaso
 
