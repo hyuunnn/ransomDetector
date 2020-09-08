@@ -145,12 +145,16 @@ class MFTParser:
         self.wr = csv.writer(self.f)
         self.wr.writerow(["path", "filename", "creation_time", "modification_time", "access_time", "entry_modification_time"])
 
+    def PlasoTimetoDateTime(self, timestamp):
+        return datetime.fromtimestamp(timestamp/1000000)
+
     def DateTimeValuesEvent(self, date_time, date_time_description, time_zone=None):
         timestamp = date_time.GetPlasoTimestamp()
-        if date_time.is_local_time and time_zone:
-            timestamp = timelib.Timestamp.LocaltimeToUTC(timestamp, time_zone)
+        #if date_time.is_local_time and time_zone:
+        #    timestamp = timelib.Timestamp.LocaltimeToUTC(timestamp, time_zone)
 
-        return timestamp, date_time_description
+        #return timestamp, date_time_description
+        return timestamp
 
     def _GetDateTime(self, filetime):
         if filetime == 0:
@@ -239,8 +243,10 @@ class MFTParser:
             for regex in regex_extension_list:
                 filename = path.split("\\")[-1]
                 if regex.match(filename):
-                    self.wr.writerow([path, filename, event_data.creation_time[0], event_data.modification_time[0], \
-                        event_data.access_time[0], event_data.entry_modification_time[0]])
+                    self.wr.writerow([path, filename, self.PlasoTimetoDateTime(event_data.creation_time), \
+                        self.PlasoTimetoDateTime(event_data.modification_time), \
+                        self.PlasoTimetoDateTime(event_data.access_time), \
+                        self.PlasoTimetoDateTime(event_data.entry_modification_time)])
                     continue
 
     #def _ParseObjectIDAttribute(self, mft_entry, mft_attribute):
