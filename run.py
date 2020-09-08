@@ -141,6 +141,10 @@ class MFTParser:
     def __init__(self, date_time):
         self.date_time = date_time
 
+        self.f = open(date_time+"_MFT.csv", 'w', encoding='utf-8-sig', newline='')
+        self.wr = csv.writer(self.f)
+        self.wr.writerow(["path", "filename", "creation_time", "modification_time", "access_time", "entry_modification_time"])
+
     def DateTimeValuesEvent(self, date_time, date_time_description, time_zone=None):
         timestamp = date_time.GetPlasoTimestamp()
         if date_time.is_local_time and time_zone:
@@ -233,8 +237,10 @@ class MFTParser:
         # Compare Extension #
         for path in event_data.path_hints:
             for regex in regex_extension_list:
-                if regex.match(path.split("\\")[-1]):
-                    print(path, regex)
+                filename = path.split("\\")[-1]
+                if regex.match(filename):
+                    self.wr.writerow([path, filename, event_data.creation_time[0], event_data.modification_time[0], \
+                        event_data.access_time[0], event_data.entry_modification_time[0]])
                     continue
 
     #def _ParseObjectIDAttribute(self, mft_entry, mft_attribute):
