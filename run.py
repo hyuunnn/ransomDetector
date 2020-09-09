@@ -360,7 +360,7 @@ if __name__ == "__main__":
     evtx_PATH = args.evtx_path
 
     now = datetime.now()
-    date_time = now.strftime("%Y-%d-%m_%H-%M-%S")
+    date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
 
     a = MFTParser(date_time)
     a.run(MFT_PATH)
