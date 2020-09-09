@@ -18,18 +18,7 @@ import definitions
 
 import csv
 from datetime import datetime
-
-MFT_PATH = "E:\\DF2020\\305\\305 - ran_some\\2020-06-02_Win10_1909\\ntfs_\\$MFT"
-#LogFile_PATH = "E:\\DF2020\\305\\305 - ran_some\\2020-06-02_Win10_1909\\ntfs_\\$LogFile"
-#UsnJrnl_PATH = "E:\\DF2020\\305\\305 - ran_some\\2020-06-02_Win10_1909\\ntfs_\\$J"
-evtx_PATH = "E:\\DF2020\\305\\305 - ran_some\\2020-06-02_Win10_1909\\C\\windows\\system32\\winevt\\logs\\"
-#prefetch_PATH = "E:\\DF2020\\305\\305 - ran_some\\2020-06-02_Win10_1909\\C\\Windows\\prefetch"
-
-ransom = ransomHandler()
-a = ransom.getExtensionList()
-a.append("*.proLock")
-a.append("[HOW TO RECOVER FILES].TXT")
-regex_extension_list = [re.compile(ransom.replaceSpecialSymbol(result)) for result in a]
+import argparse
 
 class EvtxParser:
     def __init__(self, date_time):
@@ -145,6 +134,11 @@ class MFTParser:
         self.wr = csv.writer(self.f)
         self.wr.writerow(["path", "filename", "creation_time", "modification_time", "access_time", "entry_modification_time"])
 
+        ransom = ransomHandler()
+        a = ransom.getExtensionList()
+        a.append("[HOW TO RECOVER FILES].TXT") # 아직 fsrm 사이트에 등록되어있지 않아서 append
+        self.regex_extension_list = [re.compile(ransom.replaceSpecialSymbol(result), re.IGNORECASE) for result in a]
+
     def PlasoTimetoDateTime(self, timestamp):
         return datetime.fromtimestamp(timestamp/1000000)
 
@@ -240,7 +234,7 @@ class MFTParser:
 
         # Compare Extension #
         for path in event_data.path_hints:
-            for regex in regex_extension_list:
+            for regex in self.regex_extension_list:
                 filename = path.split("\\")[-1]
                 if regex.match(filename):
                     self.wr.writerow([path, filename, self.PlasoTimetoDateTime(event_data.creation_time), \
@@ -348,6 +342,23 @@ class MFTParser:
         mft_metadata_file.close()
 
 if __name__ == "__main__":
+    '''
+    # Test PATH variables
+    MFT_PATH = "E:\\DF2020\\305\\305 - ran_some\\2020-06-02_Win10_1909\\ntfs_\\$MFT"
+    #LogFile_PATH = "E:\\DF2020\\305\\305 - ran_some\\2020-06-02_Win10_1909\\ntfs_\\$LogFile"
+    #UsnJrnl_PATH = "E:\\DF2020\\305\\305 - ran_some\\2020-06-02_Win10_1909\\ntfs_\\$J"
+    evtx_PATH = "E:\\DF2020\\305\\305 - ran_some\\2020-06-02_Win10_1909\\C\\windows\\system32\\winevt\\logs\\"
+    #prefetch_PATH = "E:\\DF2020\\305\\305 - ran_some\\2020-06-02_Win10_1909\\C\\Windows\\prefetch"
+    '''
+    parser = argparse.ArgumentParser(description='ransomDetector')
+    parser.add_argument('--mft',  help='mft', required=True)
+    parser.add_argument('--evtx_path', help='evtx_path', required=True)
+
+    args = parser.parse_args()
+
+    MFT_PATH = args.mft
+    evtx_PATH = args.evtx_path
+
     now = datetime.now()
     date_time = now.strftime("%Y-%d-%m_%H-%M-%S")
 
