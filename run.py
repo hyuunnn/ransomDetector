@@ -353,6 +353,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='ransomDetector')
     parser.add_argument('--mft',  help='mft', required=True)
     parser.add_argument('--evtx_path', help='evtx_path', required=True)
+    # python run.py --mft "$MFT" --evtx_path "C:\\windows\\system32\\winevt\\logs"
 
     args = parser.parse_args()
 
