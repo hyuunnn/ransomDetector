@@ -236,8 +236,8 @@ class MFTParser:
 
         # Compare Extension #
         for path in event_data.path_hints:
+            filename = os.path.basename(path)
             for regex in self.regex_extension_list:
-                filename = os.path.basename(path)
                 if regex.match(filename):
                     self.wr.writerow([path, filename, self.PlasoTimetoDateTime(event_data.creation_time), \
                         self.PlasoTimetoDateTime(event_data.modification_time), \
