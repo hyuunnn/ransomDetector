@@ -20,6 +20,8 @@ import csv
 from datetime import datetime
 import argparse
 
+import pyscca
+
 class EvtxParser:
     def __init__(self, date_time):
         self.date_time = date_time
@@ -235,7 +237,7 @@ class MFTParser:
         # Compare Extension #
         for path in event_data.path_hints:
             for regex in self.regex_extension_list:
-                filename = path.split("\\")[-1]
+                filename = os.path.basename(path)
                 if regex.match(filename):
                     self.wr.writerow([path, filename, self.PlasoTimetoDateTime(event_data.creation_time), \
                         self.PlasoTimetoDateTime(event_data.modification_time), \
@@ -341,6 +343,69 @@ class MFTParser:
         
         mft_metadata_file.close()
 
+class PrefetchParser:
+    def __init__(self, date_time):
+        self.date_time = date_time
+        self.f = open(date_time+"_Prefetch.csv", 'w', encoding='utf-8-sig', newline='')
+        self.wr = csv.writer(self.f)
+
+    def DateTimeValuesEvent(self, date_time, date_time_description, time_zone=None):
+        return date_time.GetPlasoTimestamp()
+
+    def PlasoTimetoDateTime(self, timestamp):
+        return datetime.fromtimestamp(timestamp/1000000)
+
+    def run(self, Prefetch_PATH):
+        filenames = os.listdir(Prefetch_PATH)
+        scca_file = pyscca.file()
+
+        for filename in filenames:
+            if filename.lower().startswith("cmd.exe"):
+                file_object = open(os.path.join(prefetch_PATH, filename), "rb")
+
+                try:
+                    scca_file.open_file_object(file_object)
+                except IOError as exception:
+                    print(exception)
+                    return
+
+                path_hints = []
+
+                for path in iter(scca_file.filenames):
+                    if not path:
+                        continue
+
+                    path_hints.append(path)
+
+                timestamp = scca_file.get_last_run_time_as_integer(0)
+                if not timestamp:
+                    date_time = dfdatetime_semantic_time.NotSet()
+                else:
+                    date_time = dfdatetime_filetime.Filetime(timestamp=timestamp)
+                event = self.DateTimeValuesEvent(
+                    date_time, definitions.TIME_DESCRIPTION_LAST_RUN)
+
+                if scca_file.format_version >= 26:
+                    for last_run_time_index in range(1, 8):
+                        timestamp = scca_file.get_last_run_time_as_integer(last_run_time_index)
+                        if not timestamp:
+                            continue
+
+                        date_time = dfdatetime_filetime.Filetime(timestamp=timestamp)
+                        date_time_description = 'Previous {0:s}'.format(
+                            definitions.TIME_DESCRIPTION_LAST_RUN)
+                        event = self.DateTimeValuesEvent(
+                            date_time, date_time_description)
+
+                self.wr.writerow(["Filename", "Last_run"])
+                self.wr.writerow([filename, self.PlasoTimetoDateTime(event)])
+                self.wr.writerow(["Path"])
+
+                for i in path_hints:
+                    self.wr.writerow([i])
+
+        self.f.close()
+
 if __name__ == "__main__":
     '''
     # Test PATH variables
@@ -349,16 +414,18 @@ if __name__ == "__main__":
     #UsnJrnl_PATH = "E:\\DF2020\\305\\305 - ran_some\\2020-06-02_Win10_1909\\ntfs_\\$J"
     evtx_PATH = "E:\\DF2020\\305\\305 - ran_some\\2020-06-02_Win10_1909\\C\\windows\\system32\\winevt\\logs\\"
     #prefetch_PATH = "E:\\DF2020\\305\\305 - ran_some\\2020-06-02_Win10_1909\\C\\Windows\\prefetch"
+    # python run.py --mft "$MFT" --evtx_path "C:\\windows\\system32\\winevt\\logs"
     '''
     parser = argparse.ArgumentParser(description='ransomDetector')
     parser.add_argument('--mft',  help='mft', required=True)
     parser.add_argument('--evtx_path', help='evtx_path', required=True)
-    # python run.py --mft "$MFT" --evtx_path "C:\\windows\\system32\\winevt\\logs"
+    parser.add_argument('--prefetch_path', help='prefetch_path', required=True)
 
     args = parser.parse_args()
 
     MFT_PATH = args.mft
     evtx_PATH = args.evtx_path
+    prefetch_PATH = args.prefetch_path
 
     now = datetime.now()
     date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
@@ -367,8 +434,11 @@ if __name__ == "__main__":
     a.run(MFT_PATH)
 
     a = EvtxParser(date_time)
-    a.run(evtx_PATH + "Microsoft-Windows-Sysmon%4Operational.evtx")
+    a.run(os.path.join(evtx_PATH, "Microsoft-Windows-Sysmon%4Operational.evtx"))
     # https://static1.squarespace.com/static/552092d5e4b0661088167e5c/t/59c1814829f18782e24f1fe2/1505853768977/Windows+PowerShell+Logging+Cheat+Sheet+ver+Sept+2017+v2.1.pdf
-    a.run(evtx_PATH + "Windows PowerShell.evtx")
-    a.run(evtx_PATH + "Microsoft-Windows-PowerShell%4Operational.evtx")
+    a.run(os.path.join(evtx_PATH, "Windows PowerShell.evtx"))
+    a.run(os.path.join(evtx_PATH, "Microsoft-Windows-PowerShell%4Operational.evtx"))
     a.close()
+
+    a = PrefetchParser(date_time)
+    a.run(prefetch_PATH)
