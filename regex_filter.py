@@ -18,7 +18,7 @@ class ransomHandler():
         try:
             preRegex = escape(regex)
             midRegex = sub(r'\\\*', "*", preRegex)
-            postRegex = sub("\*", "([\\\\\\\\ws\\\S]*)", midRegex)
+            postRegex = sub("\*", "([\\\\\\\\ws\\\S]*)", midRegex).replace("…",".*")
             return postRegex + "$"
         except Exception as err:
             print("[!] Replace Regex error : ", err)
