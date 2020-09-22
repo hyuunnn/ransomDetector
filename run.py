@@ -360,7 +360,7 @@ class PrefetchParser:
         scca_file = pyscca.file()
 
         for filename in filenames:
-            if filename.lower().startswith("cmd.exe"):
+            if filename.lower().startswith(("cmd.exe", "powershell.exe")):
                 file_object = open(os.path.join(Prefetch_PATH, filename), "rb")
 
                 try:
