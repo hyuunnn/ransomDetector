@@ -361,7 +361,7 @@ class PrefetchParser:
 
         for filename in filenames:
             if filename.lower().startswith("cmd.exe"):
-                file_object = open(os.path.join(prefetch_PATH, filename), "rb")
+                file_object = open(os.path.join(Prefetch_PATH, filename), "rb")
 
                 try:
                     scca_file.open_file_object(file_object)
