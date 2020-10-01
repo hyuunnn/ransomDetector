@@ -14,6 +14,10 @@ https://github.com/libyal/libevtx
 
 https://fsrm.experiant.ca/
 
+## Usage
+
+python run.py --mft "$MFT" --evtx_path "./winevt/logs" --prefetch_path "./prefetch"
+
 ### TODO
 
 정규식 탐지에서 속도가 꽤 오래걸림
