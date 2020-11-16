@@ -139,6 +139,9 @@ class MFTParser:
         ransom = ransomHandler()
         a = ransom.getExtensionList()
         a.append("[HOW TO RECOVER FILES].TXT") # 아직 fsrm 사이트에 등록되어있지 않아서 append
+        # a = open("regex_list.txt","rb").read().split("\n")
+        # a.append("[HOW TO RECOVER FILES].TXT")
+        
         self.regex_extension_list = [re.compile(ransom.replaceSpecialSymbol(result), re.IGNORECASE) for result in a]
 
     def PlasoTimetoDateTime(self, timestamp):
