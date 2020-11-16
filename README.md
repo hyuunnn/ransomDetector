@@ -12,6 +12,8 @@ https://github.com/martinblech/xmltodict
 
 https://github.com/libyal/libevtx
 
+https://github.com/libyal/libscca
+
 https://fsrm.experiant.ca/
 
 ## Usage
