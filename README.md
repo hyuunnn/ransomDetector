@@ -16,6 +16,8 @@ https://github.com/libyal/libscca
 
 https://fsrm.experiant.ca/
 
+<a href="https://github.com/Digitalisx">Digitalisx</a>
+
 ## Usage
 
 python run.py --mft "$MFT" --evtx_path "./winevt/logs" --prefetch_path "./prefetch"
